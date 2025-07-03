@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -18,8 +20,8 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 280, 0, 220)
-mainFrame.Position = UDim2.new(0.5, -140, 0.5, -110)
+mainFrame.Size = UDim2.new(0, 280, 0, 275) 
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -137.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
@@ -127,6 +129,7 @@ end
 local stealButton = createButton("StealButton", "🔥 STEAL", UDim2.new(0, 0, 0, 0), Color3.fromRGB(255, 60, 60))
 local goDownButton = createButton("GoDownButton", "⬇️ GO DOWN", UDim2.new(0, 0, 0, 55), Color3.fromRGB(60, 150, 255))
 local markButton = createButton("MarkButton", "📍 MARK", UDim2.new(0, 0, 0, 110), Color3.fromRGB(60, 255, 60))
+local serverHopButton = createButton("ServerHopButton", "🔄 SERVER HOP", UDim2.new(0, 0, 0, 165), Color3.fromRGB(255, 165, 0))
 
 local function steal()
     if not markPosition or isStealActive then return end
@@ -189,10 +192,53 @@ local function mark()
     pulseTween:Play()
 end
 
+local function serverHop()
+    serverHopButton.Text = "🔄 HOPPING..."
+    
+    local success, result = pcall(function()
+        
+        local placeId = game.PlaceId
+        
+        
+        local servers = game:GetService("HttpService"):JSONDecode(
+            game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
+        )
+        
+        if servers and servers.data and #servers.data > 0 then
+            
+            for _, server in pairs(servers.data) do
+                if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(placeId, server.id, player)
+                    return true
+                end
+            end
+        end
+        
+        
+        TeleportService:Teleport(placeId, player)
+        return true
+    end)
+    
+    if not success then
+        
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, player)
+        end)
+    end
+    
+    
+    spawn(function()
+        wait(5)
+        if serverHopButton then
+            serverHopButton.Text = "🔄 SERVER HOP"
+        end
+    end)
+end
+
 local function toggleMinimize()
     if isMinimized then
         local expandTween = TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 280, 0, 220)
+            Size = UDim2.new(0, 280, 0, 275)
         })
         expandTween:Play()
         minimizeButton.Text = "−"
@@ -212,6 +258,7 @@ end
 stealButton.MouseButton1Click:Connect(steal)
 goDownButton.MouseButton1Click:Connect(goDown)
 markButton.MouseButton1Click:Connect(mark)
+serverHopButton.MouseButton1Click:Connect(serverHop)
 minimizeButton.MouseButton1Click:Connect(toggleMinimize)
 
 local dragging = false
@@ -248,7 +295,7 @@ end)
 
 mainFrame.Size = UDim2.new(0, 0, 0, 0)
 local appearTween = TweenService:Create(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back), {
-    Size = UDim2.new(0, 280, 0, 220)
+    Size = UDim2.new(0, 280, 0, 275)
 })
 appearTween:Play()
 
