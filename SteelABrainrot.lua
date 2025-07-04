@@ -141,7 +141,7 @@ local function steal()
     local targetPos = markPosition
     local distance = (targetPos - currentPos).Magnitude
     
-    local steps = math.ceil(distance / 0.7)
+    local steps = math.ceil(distance / 0.85)
     local stepSize = (targetPos - currentPos) / steps
     
     local currentStep = 0
@@ -151,10 +151,10 @@ local function steal()
         if currentStep <= steps then
             local nextPos = currentPos + (stepSize * currentStep)
             rootPart.CFrame = CFrame.new(nextPos)
-            wait(0.15)
+            wait(0.10)
         else
             stepConnection:Disconnect()
-            wait(0.5)
+            wait(0.1)
             rootPart.CFrame = CFrame.new(markPosition + Vector3.new(0, 200, 0))
             stealButton.Text = "🔥 STEAL"
             isStealActive = false
