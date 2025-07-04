@@ -20,7 +20,7 @@ screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 280, 0, 275) 
+mainFrame.Size = UDim2.new(0, 280, 0, 275)
 mainFrame.Position = UDim2.new(0.5, -140, 0.5, -137.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 mainFrame.BorderSizePixel = 0
@@ -141,7 +141,7 @@ local function steal()
     local targetPos = markPosition
     local distance = (targetPos - currentPos).Magnitude
     
-    local steps = math.ceil(distance / 5)
+    local steps = math.ceil(distance / 0.7)
     local stepSize = (targetPos - currentPos) / steps
     
     local currentStep = 0
@@ -151,10 +151,10 @@ local function steal()
         if currentStep <= steps then
             local nextPos = currentPos + (stepSize * currentStep)
             rootPart.CFrame = CFrame.new(nextPos)
-            wait(0.05)
+            wait(0.15)
         else
             stepConnection:Disconnect()
-            wait(0.2)
+            wait(0.5)
             rootPart.CFrame = CFrame.new(markPosition + Vector3.new(0, 200, 0))
             stealButton.Text = "🔥 STEAL"
             isStealActive = false
@@ -196,16 +196,13 @@ local function serverHop()
     serverHopButton.Text = "🔄 HOPPING..."
     
     local success, result = pcall(function()
-        
         local placeId = game.PlaceId
-        
         
         local servers = game:GetService("HttpService"):JSONDecode(
             game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
         )
         
         if servers and servers.data and #servers.data > 0 then
-            
             for _, server in pairs(servers.data) do
                 if server.id ~= game.JobId and server.playing < server.maxPlayers then
                     TeleportService:TeleportToPlaceInstance(placeId, server.id, player)
@@ -214,18 +211,15 @@ local function serverHop()
             end
         end
         
-        
         TeleportService:Teleport(placeId, player)
         return true
     end)
     
     if not success then
-        
         pcall(function()
             TeleportService:Teleport(game.PlaceId, player)
         end)
     end
-    
     
     spawn(function()
         wait(5)
